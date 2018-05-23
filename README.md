@@ -1,2 +1,2 @@
 # automail
-detect local file,sent by email if have some new file.
+detect local folder files status, sent by email if new file exist.
