@@ -3,4 +3,6 @@
 *.[oa]
 *.pyc
 *.log
+*.exe
+*.layout
 !.gitignore
