@@ -39,7 +39,7 @@ if not os.path.isfile(cf_file):
             exit(2)
 try:
     cf.read(cf_file, encoding="utf-8-sig")
-    customer_total = int (cf.get("Common", "total"))
+    customer_total = int(cf.get("Common", "total"))
     from_email_addr = cf.get("Common", "from_email_addr")
     SMTP_SERVER = cf.get("Common", "SMTP_SERVER")
     WORK_DIR = cf.get("Common", "WORK_DIR")
@@ -59,16 +59,16 @@ customer_subject = []
 customer_sourcedir = []
 customer_destdir = []
 
-for i in range(1,customer_total+1):
+for i in range(1, customer_total + 1):
     try:
         cfstr = 'Customer' + str(i)
-        customer_name.append(cf.get(cfstr,'name'))
-        customer_folder.append(cf.get(cfstr,'folder'))
-        customer_wildcard.append(cf.get(cfstr,'wildcard'))
-        customer_toaddr.append(cf.get(cfstr,'to_email_addr'))
-        customer_ccaddr.append(cf.get(cfstr,'cc_email_addr'))
-        customer_subject.append(cf.get(cfstr,'subject'))
-        customer_sourcedir.append(cf.get(cfstr,'sourcedir'))
+        customer_name.append(cf.get(cfstr, 'name'))
+        customer_folder.append(cf.get(cfstr, 'folder'))
+        customer_wildcard.append(cf.get(cfstr, 'wildcard'))
+        customer_toaddr.append(cf.get(cfstr, 'to_email_addr'))
+        customer_ccaddr.append(cf.get(cfstr, 'cc_email_addr'))
+        customer_subject.append(cf.get(cfstr, 'subject'))
+        customer_sourcedir.append(cf.get(cfstr, 'sourcedir'))
         customer_destdir.append(cf.get(cfstr, 'destdir'))
     except:
         logging.warning("conf.ini 配置有误，参数:"+cfstr)
@@ -77,7 +77,7 @@ for i in range(1,customer_total+1):
 logging.basicConfig(level=logging.DEBUG,
                     format='%(asctime)s %(levelname)s %(message)s',
                     datefmt='%a, %d %b %Y %H:%M:%S',
-                    filename = os.path.join(WORK_DIR,'automail.log'),
+                    filename=os.path.join(WORK_DIR, 'automail.log'),
                     filemode='a')
 
 console = logging.StreamHandler()
@@ -117,7 +117,7 @@ def EnumProcesses(process_name):
             psapi.EnumProcessModules(hProcess, byref(hModule), sizeof(hModule), byref(count))
             psapi.GetModuleBaseNameA(hProcess, hModule.value, modname, sizeof(modname))
             tem_str1 = [i for i in modname if i != b'\x00']
-            j=''
+            j = ''
             for i in range(len(tem_str1)):
                 j = j + (tem_str1[i].decode('utf-8', 'ignore'))
 #            print (j)
@@ -134,13 +134,13 @@ def EnumProcesses(process_name):
             p_count += 1
 #            logging.info(str(process_name)+str(i))
     logging.info(VERSION + str(p_count))
-    if p_count > 2 :
+    if p_count > 2:
         return True
     else:
         return False
 
-def send_email(dir_path,files,toaddr,ccaddr,c_name,c_subject):
-    c_subject = c_subject.replace("YYYY-MM-DD",long_date)
+def send_email(dir_path, files, toaddr, ccaddr, c_name, c_subject):
+    c_subject = c_subject.replace("YYYY-MM-DD", long_date)
     logging.info("Subject:"+c_subject)
     msg = MIMEMultipart()
     msg['To'] = ";".join(toaddr)
@@ -150,14 +150,14 @@ def send_email(dir_path,files,toaddr,ccaddr,c_name,c_subject):
     html = ""
     template_file_name = WORK_DIR+"template\\"+c_name+".template"
     try:
-        with open(template_file_name,"r",encoding="utf-8") as t_f:
+        with open(template_file_name, "r", encoding="utf-8") as t_f:
             for temp_line in t_f:
                 html = html + temp_line
     except:
         html = '无正文内容'
 
-    html = html.replace("YYYY-MM-DD",long_date)
-    html = html.replace("ATTACHMENT","、".join(files))
+    html = html.replace("YYYY-MM-DD", long_date)
+    html = html.replace("ATTACHMENT", "、".join(files))
 
     print(html)
     body = MIMEText(html, 'plain')
@@ -174,7 +174,7 @@ def send_email(dir_path,files,toaddr,ccaddr,c_name,c_subject):
                                   filename=(Header(f, 'utf-8').encode()))
             msg.attach(msg_attach)
 
-    logging.info ("附件共" + str(len(files)) + "个，其中有："+ fullname)
+    logging.info("附件共" + str(len(files)) + "个，其中有："+ fullname)
 
 #    return 2
 #if enable return, then program will not send email...
@@ -187,15 +187,15 @@ def send_email(dir_path,files,toaddr,ccaddr,c_name,c_subject):
     logging.info(c_name + ":发送邮件："+"to:"+";".join(toaddr)+" ;附件："+";".join(files))
     server.quit()
 
-def dir_compare_diff(dir_com1,dir_com2,folder):
+def dir_compare_diff(dir_com1, dir_com2, folder):
     dcmp = dircmp(dir_com1, dir_com2)
     is_diff = False
-    if len(dcmp.diff_files)>0:
+    if len(dcmp.diff_files) > 0:
         is_diff = True
-        logging.info ("diff_file:" + ";".join(dcmp.diff_files))
-    if len(dcmp.left_only)>0:
+        logging.info("diff_file:" + ";".join(dcmp.diff_files))
+    if len(dcmp.left_only) > 0:
         is_diff = True
-        logging.info ("source_only:" + ";".join(dcmp.left_only))
+        logging.info("source_only:" + ";".join(dcmp.left_only))
     return is_diff
     return True
 
@@ -213,9 +213,9 @@ def get_customer_file_list(folder,wildard):
             _wcard = _wildcard[i]
             _wcard = _wcard.replace('*','')
             for j in os.listdir(source_dir):
-                if j.find(_wcard) != -1 :
+                if j.find(_wcard) != -1:
                     have_file = True
-                    if not(j in _filelist):
+                    if not (j in _filelist):
                         _filelist.append(j)
         if not have_file :
 #            logging.info("无更新:"+source_dir+" "+wildard)
@@ -224,7 +224,7 @@ def get_customer_file_list(folder,wildard):
 
 
 def get_customer_mail_list(toaddr):
-    _mail_list =[]
+    _mail_list = []
     _to_addr = toaddr.split("|")
     for i in range(len(_to_addr)):
         if len(_to_addr[i]) > 7:
@@ -234,7 +234,7 @@ def get_customer_mail_list(toaddr):
                 logging.info("邮件地址有误："+_to_addr[i])
     return _mail_list
 
-def prepare_files(source_dir,  target_dir):
+def prepare_files(source_dir, target_dir):
     copy_ok = True
     for file in os.listdir(source_dir):
         sourceFile = os.path.join(source_dir,  file)
