@@ -1,5 +1,17 @@
 # -*- coding: UTF-8 -*-
 #Author: JasonChan
+# 程序运行于windows操作系统，在win7/10，win server 2012上运行正常。
+# 运行于linux系统的话，需要对涉及文件操作的部分作适当的调整，已符合linux文件操作规则。
+# 本程序只可单次运行，于需多次运行（定时运行），需采用系统服务调用本程序，此功能已
+# 在本项目的autoservice程序实现，也可通过操作系统自带的计划任务调用。
+# 现由于系统需求，配置文件中需配置三个文件夹，待处理的原始文件夹，比对文件夹，文件处理过程文件夹
+# 用户只需对原始文件夹进行操作，其余文件夹是系统处理的中间过程，用户可不予理会。
+# 用户见将要发送的文件复制/移动到原始文件夹，系统对文件进行分析，发现新文件/有变更的文件
+# 系统将准备将文件已附件形式发送电子邮件给指定邮箱，指定邮箱在配置文件中设置，电子邮件的主题
+# 正文内容，签名等按照模板设置自动编辑。模板文件保存在template文件夹中。可自行编辑，有一注意
+# 的地方，保存模板文件时需已utf-8编码进行保存，建议在现有文件基础上复制/修改模板文件。
+# 模板文件名需与配置文件的名称一致，否则无效。
+
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
@@ -27,7 +39,7 @@ SMTP_SENDER = ""
 
 long_date = time.strftime('%Y-%m-%d', time.localtime(time.time()))
 folder_prefix = time.strftime('%Y%m%d%H%M%S', time.localtime(time.time()))
-
+#设置配置文件所在文件夹，已指定文件夹名字为/automail，可保存在c/d/e盘，自动查找。
 cf = configparser.ConfigParser()
 cf_file = 'c:\\automail\\automail.ini'
 if not os.path.isfile(cf_file):
@@ -88,6 +100,7 @@ psapi = windll.psapi
 kernel = windll.kernel32
 
 def EnumProcesses(process_name):
+    #枚举系统运行进程，查找系统中是否已有本程序在运行，返回一布尔量，系统主程序判断处理方法
     arr = c_ulong * 256
     lpidProcess = arr()
     cb = sizeof(lpidProcess)
@@ -140,6 +153,7 @@ def EnumProcesses(process_name):
         return False
 
 def send_email(dir_path, files, toaddr, ccaddr, c_name, c_subject):
+    #发送电子邮件，参数包括发送附件所在文件夹，文件清单，电子邮件接收，抄送，主题等参数
     c_subject = c_subject.replace("YYYY-MM-DD", long_date)
     logging.info("Subject:"+c_subject)
     msg = MIMEMultipart()
@@ -188,6 +202,7 @@ def send_email(dir_path, files, toaddr, ccaddr, c_name, c_subject):
     server.quit()
 
 def dir_compare_diff(dir_com1, dir_com2, folder):
+    #文件夹比较，参数为待比较的两个文件夹
     dcmp = dircmp(dir_com1, dir_com2)
     is_diff = False
     if len(dcmp.diff_files) > 0:
@@ -200,6 +215,7 @@ def dir_compare_diff(dir_com1, dir_com2, folder):
     return True
 
 def get_customer_file_list(folder,wildard):
+    #获取指定文件夹内文件列表，同时满足通配符规则，返回文件列表。
     _filelist = []
     source_dir = folder
     have_file = False
@@ -224,6 +240,7 @@ def get_customer_file_list(folder,wildard):
 
 
 def get_customer_mail_list(toaddr):
+    #检查发送电子邮件接收人邮箱是否符合电子邮件格式，通过正则表达式匹配。
     _mail_list = []
     _to_addr = toaddr.split("|")
     for i in range(len(_to_addr)):
@@ -235,6 +252,7 @@ def get_customer_mail_list(toaddr):
     return _mail_list
 
 def prepare_files(source_dir, target_dir):
+    #复制文件，为待发送电子邮件的附件文件复制到指定文件夹，准备发送
     copy_ok = True
     for file in os.listdir(source_dir):
         sourceFile = os.path.join(source_dir,  file)
@@ -247,6 +265,7 @@ def prepare_files(source_dir, target_dir):
             copy_ok = False
     return copy_ok
 def check_diff_n_leftonly_files(dir1,dir2):
+    #文件夹比较，检查只存在在左边文件夹的情况，即检查是否有新文件。
     dcmp = dircmp(dir1, dir2)
     is_diff = False
     if len(dcmp.diff_files)>0:
@@ -258,6 +277,7 @@ def check_diff_n_leftonly_files(dir1,dir2):
     return is_diff
 
 def check_diff_files(dir1,dir2):
+    #检查文件夹，检查是否存在文件夹内相同的文件是否存在差异。
 #check directory diff, only check files diffenect exist in both side.
     dcmp = dircmp(dir1, dir2)
     is_diff = False
@@ -268,6 +288,7 @@ def check_diff_files(dir1,dir2):
 
 
 def check_smtp_server(ipaddr,port):
+    #检查发送电子邮件用的smtp服务器是否可用，指定IP地址和端口号
     try:
         sock = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
         sock.settimeout(3)
@@ -279,6 +300,7 @@ def check_smtp_server(ipaddr,port):
         return False
 
 def check_server_auth():
+    #检查发送电子邮件用户/密码是否可用
     try:
         server = smtplib.SMTP(SMTP_SERVER, 25)
         server.login(SMTP_USER, SMTP_PWD)
@@ -288,6 +310,7 @@ def check_server_auth():
         return False
 
 def mail_server_ok():
+    #确认邮件服务器可用
     delay_time = 1
     while not check_server_auth():
         logging.critical("无法连上邮件服务器 或 用户认证失败：" + SMTP_SERVER+"... ... "+str(delay_time * 10)+" 秒后重试")
@@ -301,6 +324,7 @@ def mail_server_ok():
         logging.info("连接SMTP服务器OK: " + SMTP_SERVER)
 
 def clear_files(dir):
+    #清理指定文件夹，将已发送邮件的文件移动到指定文件夹，清理本文件夹
     rootdir = dir
     for parent, dirnames, filenames in os.walk(rootdir, False):
         for name in filenames:
@@ -331,6 +355,7 @@ def erase_dir(dir):
 
 
 def clear_expire_folder():
+    #清理过期文件夹，历史文件夹
     rootdir = WORK_DIR + "sent"
     def is_expire(str):
         try:
@@ -349,6 +374,7 @@ def clear_expire_folder():
             erase_dir(rootdir + '\\' + cef_foldername)
 
 def compare_clear_right_side(dir1,dir2):
+    #比较右侧文件夹，清理不相符的文件夹
     holderlist = []
     if dir1 == '' or dir2 == '':
         return 2
@@ -409,6 +435,7 @@ def compare_clear_right_side(dir1,dir2):
 
 
 def main_compare_sync(dir1,dir2,dir2_diff):
+    #文件夹比较和同步程序
     holderlist = []
     if dir1 == '' or dir2 == '':
         return 2
@@ -469,6 +496,7 @@ def main_compare_sync(dir1,dir2,dir2_diff):
 
 
 if __name__ == '__main__':
+    #系统主程序
     if EnumProcesses('automail.exe'):
         logging.warning('automail.exe is running ,请不要重复运行. Exit().')
         exit(4)
