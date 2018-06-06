@@ -30,7 +30,7 @@ import socket
 from ctypes import *
 import shutil
 
-VERSION = "Ver: 20180409 "
+VERSION = "Ver: 20180606 "
 SMTP_SERVER = ""
 WORK_DIR = ""
 SMTP_USER = ""
@@ -553,4 +553,3 @@ if __name__ == '__main__':
 
             send_email(prepare_folder,file_list,tomail_list,ccmail_list,c_name,c_subject)
             logging.info("sending mail....."+c_name)
-

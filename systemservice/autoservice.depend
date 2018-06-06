@@ -24,3 +24,16 @@
 	<sys/timeb.h>
 	<iostream>
 
+1528271397 source:f:\dev\github\automail\systemservice\main.cpp
+	<windows.h>
+	<stdio.h>
+	"tlhelp32.h"
+	"RcLogInfo.h"
+
+1525684995 f:\dev\github\automail\systemservice\rcloginfo.h
+	<windows.h>
+	<time.h>
+	<stdio.h>
+	<sys/timeb.h>
+	<iostream>
+
