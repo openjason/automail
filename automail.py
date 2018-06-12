@@ -30,7 +30,7 @@ import socket
 from ctypes import *
 import shutil
 
-VERSION = "Ver: 20180606 "
+VERSION = "Ver: 20180612 "
 SMTP_SERVER = ""
 WORK_DIR = ""
 SMTP_USER = ""
@@ -198,7 +198,7 @@ def send_email(dir_path, files, toaddr, ccaddr, c_name, c_subject):
     mailbody = msg.as_string()
 
     server.sendmail(SMTP_USER, toaddr + ccaddr, mailbody) #send mail to & cc email address
-    logging.info(c_name + ":发送邮件："+"to:"+";".join(toaddr)+" ;附件："+";".join(files))
+    logging.info(c_name + ":发送邮件："+"to:"+";".join(toaddr + ccaddr)+" ;附件："+";".join(files))
     server.quit()
 
 def dir_compare_diff(dir_com1, dir_com2, folder):
