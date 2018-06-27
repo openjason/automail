@@ -1,5 +1,4 @@
 # -*- coding: UTF-8 -*-
-#Author: JasonChan
 
 import smtplib
 import logging
